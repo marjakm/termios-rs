@@ -105,6 +105,7 @@
 //! ```
 
 extern crate libc;
+#[macro_use] extern crate ioctl;
 
 use std::io;
 use std::mem;
@@ -113,6 +114,7 @@ use std::os::unix::io::RawFd;
 
 use libc::{c_int,pid_t};
 
+#[cfg(target_os = "linux")] pub use ::os::target::{tcgets2,tcsets2};
 pub use ::os::target::{cc_t,speed_t,tcflag_t}; // types
 pub use ::os::target::{VEOF,VEOL,VERASE,VINTR,VKILL,VMIN,VQUIT,VSTART,VSTOP,VSUSP,VTIME}; // c_cc subscripts
 pub use ::os::target::{BRKINT,ICRNL,IGNBRK,IGNCR,IGNPAR,INLCR,INPCK,ISTRIP,IXANY,IXOFF,IXON,PARMRK}; // input modes

@@ -8,6 +8,21 @@ pub type cc_t = c_uchar;
 pub type speed_t = c_uint;
 pub type tcflag_t = c_uint;
 
+
+mod ffi {
+    ioctl!(read tcgets2 with b'T', 0x2A; super::termios2);
+    ioctl!(write tcsets2 with b'T', 0x2B; super::termios2);
+}
+
+pub fn tcgets2(fd: c_int, t: &mut termios2) -> ::std::io::Result<()> {
+    ::io_result(unsafe { self::ffi::tcgets2(fd, t) })
+}
+
+pub fn tcsets2(fd: c_int, t: &termios2) -> ::std::io::Result<()> {
+    ::io_result(unsafe { self::ffi::tcsets2(fd, t) })
+}
+
+
 #[derive(Debug,Copy,Clone,Eq,PartialEq)]
 #[repr(C)]
 pub struct termios {
@@ -17,8 +32,21 @@ pub struct termios {
     pub c_lflag: tcflag_t,
     c_line: cc_t,
     pub c_cc: [cc_t; NCCS],
-    c_ispeed: speed_t,
-    c_ospeed: speed_t
+    pub c_ispeed: speed_t,
+    pub c_ospeed: speed_t
+}
+
+#[derive(Debug,Copy,Clone,Eq,PartialEq)]
+#[repr(C)]
+pub struct termios2 {
+    pub c_iflag: tcflag_t,
+    pub c_oflag: tcflag_t,
+    pub c_cflag: tcflag_t,
+    pub c_lflag: tcflag_t,
+    c_line: cc_t,
+    pub c_cc: [cc_t; 19],
+    pub c_ispeed: speed_t,
+    pub c_ospeed: speed_t
 }
 
 pub const NCCS: usize = 32;
@@ -147,6 +175,7 @@ pub const B19200:   speed_t = 0o000016;
 pub const B38400:   speed_t = 0o000017;
 pub const EXTA:     speed_t = B19200;
 pub const EXTB:     speed_t = B38400;
+pub const BOTHER:   speed_t = 0o010000;
 pub const B57600:   speed_t = 0o010001;
 pub const B115200:  speed_t = 0o010002;
 pub const B230400:  speed_t = 0o010003;
