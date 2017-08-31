@@ -10,8 +10,45 @@ pub type tcflag_t = c_uint;
 
 
 mod ffi {
-    ioctl!(read tcgets2 with b'T', 0x2A; super::termios2);
-    ioctl!(write tcsets2 with b'T', 0x2B; super::termios2);
+    const NRBITS: u32 = 8;
+    const TYPEBITS: u32 = 8;
+
+    const READ: u8 = 2;
+    const WRITE: u8 = 1;
+    const SIZEBITS: u8 = 14;
+
+    const NRSHIFT: u32 = 0;
+    const TYPESHIFT: u32 = NRSHIFT + NRBITS as u32;
+    const SIZESHIFT: u32 = TYPESHIFT + TYPEBITS as u32;
+    const DIRSHIFT: u32 = SIZESHIFT + SIZEBITS as u32;
+
+    #[inline]
+    pub unsafe fn tcgets2(fd: ::libc::c_int, val: *mut super::termios2) -> ::libc::c_int {
+        ::libc::ioctl(
+            fd,
+            (
+                ((READ as u32) << DIRSHIFT)  |
+                ((b'T' as u32) << TYPESHIFT) |
+                ((0x2A as u32)   << NRSHIFT)   |
+                ((::std::mem::size_of::<super::termios2>() as u32) << SIZESHIFT)
+            ) as ::libc::c_ulong,
+            val
+        )
+    }
+
+    #[inline]
+    pub unsafe fn tcsets2(fd: ::libc::c_int, val: *const super::termios2) -> ::libc::c_int {
+        ::libc::ioctl(
+            fd,
+            (
+                ((WRITE as u32) << DIRSHIFT)  |
+                ((b'T' as u32)  << TYPESHIFT) |
+                ((0x2B as u32)    << NRSHIFT)   |
+                ((::std::mem::size_of::<super::termios2>() as u32) << SIZESHIFT)
+            ) as ::libc::c_ulong,
+            val
+        )
+    }
 }
 
 pub fn tcgets2(fd: c_int, t: &mut termios2) -> ::std::io::Result<()> {

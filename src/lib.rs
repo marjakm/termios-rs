@@ -105,7 +105,6 @@
 //! ```
 
 extern crate libc;
-#[macro_use] extern crate ioctl;
 
 use std::io;
 use std::mem;
